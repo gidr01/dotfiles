@@ -4,7 +4,6 @@ set -x COLORTERM truecolor
 set -x DEFAULT_USER $USER
 set -x MICRO_TRUECOLOR 1
 set -x TERMINAL wezterm
-fish_vi_key_bindings
 set fish_cursor_default     block      blink
 set fish_cursor_insert      line       blink
 set fish_cursor_replace_one underscore blink
