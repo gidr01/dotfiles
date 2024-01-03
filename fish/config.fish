@@ -33,13 +33,6 @@ alias l.="exa -a | egrep '^\.'" # show only dotfiles
 alias ip="ip -color"
 # Replace some more things with better alternatives
 alias cat='bat --style header --style rule --style snip --style changes --style header'
-# typos
-alias celar=clear
-alias clea=clear
-alias clera=clear
-alias cls=clear
-alias lcear=clear
-alias sl=ls
 # dev
 alias diff="diff --color"
 alias j=just
