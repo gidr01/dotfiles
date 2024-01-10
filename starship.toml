@@ -23,6 +23,9 @@ symbol = " "
 symbol = " "
 
 [directory]
+truncation_length = 4
+# Catppuccin 'lavender'
+style = "bold lavender"
 read_only = " 󰌾"
 
 [docker_context]
@@ -143,10 +146,6 @@ symbol = " "
 
 [scala]
 symbol = " "
-[directory]
-truncation_length = 4
-# Catppuccin 'lavender'
-style = "bold lavender"
 
 # palette tables should be last in the config ⚓️
 [palettes.catppuccin_macchiato]
