@@ -1,113 +1,176 @@
+## Set values
+# Hide welcome message & ensure we are reporting fish as shell
 set fish_greeting
-set -x EDITOR helix
-set -x COLORTERM truecolor
-set -x DEFAULT_USER $USER
-set -x MICRO_TRUECOLOR 1
-set -x TERMINAL wezterm
-set fish_cursor_default     block      blink
-set fish_cursor_insert      line       blink
-set fish_cursor_replace_one underscore blink
-set fish_cursor_visual      block
-#starship
-starship init fish | source
-# Set the cursor shapes for the different vi modes.
+set VIRTUAL_ENV_DISABLE_PROMPT "1"
+set -x SHELL /usr/bin/fish
 
-fish_add_path ~/.cargo/bin
-# retrieve command cheat sheets from cheat.sh
-# fish version by @tobiasreischmann
-
-function cheat.sh
-    curl cheat.sh/$argv
+## Export variable need for qt-theme
+if type "qtile" >> /dev/null 2>&1
+   set -x QT_QPA_PLATFORMTHEME "qt5ct"
 end
 
-# register completions (on-the-fly, non-cached, because the actual command won't be cached anyway
-complete -c cheat.sh -xa '(curl -s cheat.sh/:list)'
-## Useful aliases
-# Replace ls with exa
-alias ls='exa -al --color=always --group-directories-first --icons' # preferred listing
-alias la='exa -a --color=always --group-directories-first --icons' # all files and dirs
-alias ll='exa -l --color=always --group-directories-first --icons' # long format
-alias lt='exa -aT --color=always --group-directories-first --icons' # tree listing
-alias l.="exa -a | egrep '^\.'" # show only dotfiles
-alias ip="ip -color"
-# Replace some more things with better alternatives
-alias cat='bat --style header --style rule --style snip --style changes --style header'
-# dev
-alias diff="diff --color"
-alias j=just
-alias kg="ssh-keygen -t rsa -b 4096 -C" # command + email
-alias logrep="/bin/cat /var/log/**/*.log |rg "
-alias sshp='ssh -o PubkeyAuthentication=no '
-# arch
-alias pi="sudo pacman -S --noconfirm --color auto"
-alias pss="sudo pacman -Ss --color auto"
-alias yi="yay -S --noconfirm --color auto"
-alias yss="yay -Ss --color auto"
-alias ycc="yay -Scc -v --color auto"
-alias pu="sudo pacman -U --noconfirm --needed -v --color auto"
-alias yu="yay -U --noconfirm --needed -v --color auto"
-alias yug="yay -Syyua --devel --noconfirm --needed --color auto"
-#rust equivalents and aliases
-alias car=cargo
-#alias cd=zoxide
-#alias cm="cargo make"
-#alias cp=fcp
-#alias cp=xcp
-#alias cut=tuc
-#alias du=dua
-#alias mv=pmv
-#alias nvm=fnm
-#alias ps=procs
-#alias reflector=asu
-#alias rm=rip
-#alias sed=sd
-#alias sloc=tokei
-#alias sysctl=systeroid
-#alias tail=staart
-#alias time=rtime
-#alias time=tally
-#alias top=btm
-#alias topgrade=topgrade-rs
-#alias touch=riptouch
-alias tree=tree-rs
-#alias wc=cw
-alias xcd='cd "$(xplr --print-pwd-as-result)"'
-alias md=mkdir
-# misc
-# git
-alias github=gh
-alias gbsutomm="git branch --set-upstream-to=origin/master master"
-alias gcl="git clone --recursive --depth=1"
-alias glog="git log --oneline --abbrev-commit --all --graph --decorate --color"
-alias gpsuom="git push --set-upstream origin master"
-alias grao="git remote add origin"
-alias gst="git status -s"
+# Set settings for https://github.com/franciscolourenco/done
+set -U __done_min_cmd_duration 10000
+set -U __done_notification_urgency_level low
 
-# garuda linux
-alias grubup="sudo update-grub"
-alias unlockpm="sudo rm /var/lib/pacman/db.lck"
-alias tarnow='tar -acf '
-alias untar='tar -xvf '
-alias wget='wget -c '
-alias rmpkg="sudo pacman -Rdd"
-alias psmem='ps auxf | sort -nr -k 4'
-alias psmem10='ps auxf | sort -nr -k 4 | head -10'
-alias ..='cd ..'
-alias ...='cd ../..'
-alias ....='cd ../../..'
-alias .....='cd ../../../..'
-alias ......='cd ../../../../..'
-alias dir='dir --color=auto'
-alias vdir='vdir --color=auto'
-alias grep='grep --color=auto'
-alias fgrep='fgrep --color=auto'
-alias egrep='egrep --color=auto'
-alias hw='hwinfo --short' # Hardware Info
-alias big="expac -H M '%m\t%n' | sort -h | nl" # Sort installed packages according to size in MB
-alias gitpkg='pacman -Q | grep -i "\-git" | wc -l' # List amount of -git packages
-# Cleanup orphaned packages
-alias cleanup='sudo pacman -Rns (pacman -Qtdq)'
+
+## Environment setup
+# Apply .profile: use this to put fish compatible .profile stuff in
+if test -f ~/.fish_profile
+  source ~/.fish_profile
+end
+
+# Add ~/.local/bin to PATH
+if test -d ~/.local/bin
+    if not contains -- ~/.local/bin $PATH
+        set -p PATH ~/.local/bin
+    end
+end
+
+# Add depot_tools to PATH
+if test -d ~/Applications/depot_tools
+    if not contains -- ~/Applications/depot_tools $PATH
+        set -p PATH ~/Applications/depot_tools
+    end
+end
+
+
+## Starship prompt
+if status --is-interactive
+   source ("/usr/bin/starship" init fish --print-full-init | psub)
+end
+
+
+## Advanced command-not-found hook
+source /usr/share/doc/find-the-command/ftc.fish
+
+
+## Functions
+# Functions needed for !! and !$ https://github.com/oh-my-fish/plugin-bang-bang
+function __history_previous_command
+  switch (commandline -t)
+  case "!"
+    commandline -t $history[1]; commandline -f repaint
+  case "*"
+    commandline -i !
+  end
+end
+
+function __history_previous_command_arguments
+  switch (commandline -t)
+  case "!"
+    commandline -t ""
+    commandline -f history-token-search-backward
+  case "*"
+    commandline -i '$'
+  end
+end
+
+if [ "$fish_key_bindings" = fish_vi_key_bindings ];
+  bind -Minsert ! __history_previous_command
+  bind -Minsert '$' __history_previous_command_arguments
+else
+  bind ! __history_previous_command
+  bind '$' __history_previous_command_arguments
+end
+
+# Fish command history
+function history
+    builtin history --show-time='%F %T '
+end
+
+function backup --argument filename
+    cp $filename $filename.bak
+end
+
+# Copy DIR1 DIR2
+function copy
+    set count (count $argv | tr -d \n)
+    if test "$count" = 2; and test -d "$argv[1]"
+	set from (echo $argv[1] | string trim --right --chars=/)
+	set to (echo $argv[2])
+        command cp -r $from $to
+    else
+        command cp $argv
+    end
+end
+
+# Cleanup local orphaned packages
+function cleanup
+    while pacman -Qdtq
+        sudo pacman -R (pacman -Qdtq)
+    end
+end
+
+## Useful aliases
+
+# Replace ls with eza
+alias ls 'eza -al --color=always --group-directories-first --icons' # preferred listing
+alias la 'eza -a --color=always --group-directories-first --icons'  # all files and dirs
+alias ll 'eza -l --color=always --group-directories-first --icons'  # long format
+alias lt 'eza -aT --color=always --group-directories-first --icons' # tree listing
+alias l. 'eza -ald --color=always --group-directories-first --icons .*' # show only dotfiles
+
+# Replace some more things with better alternatives
+alias cat 'bat --style header --style snip --style changes --style header'
+if not test -x /usr/bin/yay; and test -x /usr/bin/paru
+    alias yay 'paru'
+end
+
+
+# Common use
+alias .. 'cd ..'
+alias ... 'cd ../..'
+alias .... 'cd ../../..'
+alias ..... 'cd ../../../..'
+alias ...... 'cd ../../../../..'
+alias big 'expac -H M "%m\t%n" | sort -h | nl'     # Sort installed packages according to size in MB (expac must be installed)
+alias dir 'dir --color=auto'
+alias fixpacman 'sudo rm /var/lib/pacman/db.lck'
+alias gitpkg 'pacman -Q | grep -i "\-git" | wc -l' # List amount of -git packages
+alias grep 'ugrep --color=auto'
+alias egrep 'ugrep -E --color=auto'
+alias fgrep 'ugrep -F --color=auto'
+alias grubup 'sudo update-grub'
+alias hw 'hwinfo --short'                          # Hardware Info
+alias ip 'ip -color'
+alias psmem 'ps auxf | sort -nr -k 4'
+alias psmem10 'ps auxf | sort -nr -k 4 | head -10'
+alias rmpkg 'sudo pacman -Rdd'
+alias tarnow 'tar -acf '
+alias untar 'tar -zxvf '
+alias upd '/usr/bin/garuda-update'
+alias vdir 'vdir --color=auto'
+alias wget 'wget -c '
+
+# Get fastest mirrors
+alias mirror 'sudo reflector -f 30 -l 30 --number 10 --verbose --save /etc/pacman.d/mirrorlist'
+alias mirrora 'sudo reflector --latest 50 --number 20 --sort age --save /etc/pacman.d/mirrorlist'
+alias mirrord 'sudo reflector --latest 50 --number 20 --sort delay --save /etc/pacman.d/mirrorlist'
+alias mirrors 'sudo reflector --latest 50 --number 20 --sort score --save /etc/pacman.d/mirrorlist'
+
+# Help people new to Arch
+alias apt 'man pacman'
+alias apt-get 'man pacman'
+alias please 'sudo'
+alias tb 'nc termbin.com 9999'
+alias helpme 'echo "To print basic information about a command use tldr <command>"'
+alias pacdiff 'sudo -H DIFFPROG=meld pacdiff'
+
 # Get the error messages from journalctl
-alias jctl="journalctl -p 3 -xb"
+alias jctl 'journalctl -p 3 -xb'
+
 # Recent installed packages
-alias rpkgs="expac --timefmt='%Y-%m-%d %T' '%l\t%n %v' | sort | tail -200 | nl"
+alias rip 'expac --timefmt="%Y-%m-%d %T" "%l\t%n %v" | sort | tail -200 | nl'
+
+## Run fastfetch if session is interactive
+##if status --is-interactive && type -q fastfetch
+##   fastfetch --load-config dr460nized
+##end
+if status --is-interactive 
+    pokemon-colorscripts --no-title -r 1,3,6
+end
+
+# tabtab source for electron-forge package
+# uninstall by removing these lines or running `tabtab uninstall electron-forge`
+[ -f /home/gidr01/.npm/_npx/6913fdfd1ea7a741/node_modules/tabtab/.completions/electron-forge.fish ]; and . /home/gidr01/.npm/_npx/6913fdfd1ea7a741/node_modules/tabtab/.completions/electron-forge.fish

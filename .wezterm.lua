@@ -1,15 +1,5 @@
---- wezterm.lua
---- $ figlet -f small Wezterm
---- __      __      _
---- \ \    / /__ __| |_ ___ _ _ _ __
----  \ \/\/ / -_)_ /  _/ -_) '_| '  \
----   \_/\_/\___/__|\__\___|_| |_|_|_|
----
---- My Wezterm config file
-
 local wezterm = require("wezterm")
 local act = wezterm.action
-
 local fish_path = "/usr/bin/fish"
 
 local config = {}
@@ -17,11 +7,9 @@ local config = {}
 if wezterm.config_builder then config = wezterm.config_builder() end
 
 -- Settings
-config.default_prog = { fish_path, "-l" }
-
 config.color_scheme = "Catppuccin Mocha"
 config.font = wezterm.font_with_fallback({
-  { family = "CaskaydiaCove Nerd Font",  scale = 1.2 },
+  { family = "JetBrainsMono Nerd Font",  scale = 1.3 },
   { family = "Noto Color Emoji"}
 })
 config.window_background_opacity = 0.8
