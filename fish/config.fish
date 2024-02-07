@@ -4,21 +4,11 @@ set fish_greeting
 set VIRTUAL_ENV_DISABLE_PROMPT "1"
 set -x SHELL /usr/bin/fish
 
-## Export variable need for qt-theme
-if type "qtile" >> /dev/null 2>&1
-   set -x QT_QPA_PLATFORMTHEME "qt5ct"
-end
 
 # Set settings for https://github.com/franciscolourenco/done
 set -U __done_min_cmd_duration 10000
 set -U __done_notification_urgency_level low
 
-
-## Environment setup
-# Apply .profile: use this to put fish compatible .profile stuff in
-if test -f ~/.fish_profile
-  source ~/.fish_profile
-end
 
 # Add ~/.local/bin to PATH
 if test -d ~/.local/bin
@@ -34,11 +24,6 @@ if test -d ~/Applications/depot_tools
     end
 end
 
-
-## Starship prompt
-if status --is-interactive
-   source ("/usr/bin/starship" init fish --print-full-init | psub)
-end
 
 
 ## Advanced command-not-found hook
@@ -171,6 +156,5 @@ if status --is-interactive
     pokemon-colorscripts --no-title -r 1,3,6
 end
 
-# tabtab source for electron-forge package
-# uninstall by removing these lines or running `tabtab uninstall electron-forge`
-[ -f /home/gidr01/.npm/_npx/6913fdfd1ea7a741/node_modules/tabtab/.completions/electron-forge.fish ]; and . /home/gidr01/.npm/_npx/6913fdfd1ea7a741/node_modules/tabtab/.completions/electron-forge.fish
+# Starship
+starship init fish | source
